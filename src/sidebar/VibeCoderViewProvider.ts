@@ -110,7 +110,7 @@ export class VibeCoderViewProvider implements vscode.WebviewViewProvider {
           break;
 
         case "submitPrompt":
-          await this.handleSubmitPrompt(message.prompt, message.modelId);
+          await this.handleSubmitPrompt(message.prompt, message.modelId, message.isGovernanceCheck);
           break;
 
         case "loadSession":
@@ -163,17 +163,17 @@ export class VibeCoderViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async handleSubmitPrompt(prompt: string, modelId: string) {
+  private async handleSubmitPrompt(prompt: string, modelId: string, isGovernanceCheck?: boolean) {
     if (!this.view) return;
 
     let session = this.sessions.find(s => s.id === this.currentSessionId);
     if (!session) {
-      session = this.createNewSession(prompt.substring(0, 30), modelId);
+      session = this.createNewSession(isGovernanceCheck ? "🛡️ AI Governance Check" : prompt.substring(0, 30), modelId);
     }
 
     session.modelId = modelId;
     if (session.title === "New Chat" && session.conversation.length === 0) {
-      session.title = prompt.substring(0, 30) + (prompt.length > 30 ? "..." : "");
+      session.title = isGovernanceCheck ? "🛡️ AI Governance Check" : (prompt.substring(0, 30) + (prompt.length > 30 ? "..." : ""));
     }
 
     // Add user message to history
@@ -218,7 +218,8 @@ export class VibeCoderViewProvider implements vscode.WebviewViewProvider {
         }
       },
       requireFileEditApproval,
-      requireCommandApproval
+      requireCommandApproval,
+      isGovernanceCheck
     );
 
     this.postToWebview({ type: "loopFinished" });

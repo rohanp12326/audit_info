@@ -11,6 +11,9 @@ export function tryRepairJson(input: string): string {
   // Try to extract the first balanced JSON object {...}
   cleaned = extractFirstBalancedObject(cleaned);
 
+  // Escape unescaped control characters in JSON string values
+  cleaned = escapeControlCharsInJsonStrings(cleaned);
+
   // Let's try parsing. If it fails, let's try some simple heuristics.
   try {
     JSON.parse(cleaned);
@@ -30,6 +33,59 @@ export function tryRepairJson(input: string): string {
       return cleaned;
     }
   }
+}
+
+export function escapeControlCharsInJsonStrings(str: string): string {
+  let result = "";
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+
+    if (inString) {
+      if (escape) {
+        result += char;
+        escape = false;
+        continue;
+      }
+
+      if (char === "\\") {
+        result += char;
+        escape = true;
+        continue;
+      }
+
+      if (char === '"') {
+        result += char;
+        inString = false;
+        continue;
+      }
+
+      // Check for raw control characters inside string literal
+      if (char === "\n") {
+        result += "\\n";
+      } else if (char === "\r") {
+        result += "\\r";
+      } else if (char === "\t") {
+        result += "\\t";
+      } else {
+        const code = char.charCodeAt(0);
+        if (code < 32) {
+          result += "\\u" + code.toString(16).padStart(4, '0');
+        } else {
+          result += char;
+        }
+      }
+    } else {
+      if (char === '"') {
+        inString = true;
+      }
+      result += char;
+    }
+  }
+
+  return result;
 }
 
 export function extractFirstBalancedObject(str: string): string {

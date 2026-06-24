@@ -591,3 +591,93 @@ textarea:focus {
   background-position: right 6px center !important;
 }
 
+/* Markdown Formatting in Assistant Chat bubbles */
+.message.assistant p {
+  margin: 0 0 8px 0;
+}
+.message.assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.message.assistant h1,
+.message.assistant h2,
+.message.assistant h3,
+.message.assistant h4 {
+  margin: 12px 0 6px 0;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground, #ffffff);
+  letter-spacing: 0.3px;
+}
+
+.message.assistant h1 { font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+.message.assistant h2 { font-size: 13px; }
+.message.assistant h3 { font-size: 12px; }
+
+.message.assistant ul,
+.message.assistant ol {
+  margin: 6px 0 10px 0;
+  padding-left: 20px;
+}
+
+.message.assistant li {
+  margin-bottom: 4px;
+}
+
+.message.assistant code {
+  font-family: 'JetBrains Mono', monospace;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #a78bfa;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.message.assistant pre {
+  margin: 8px 0;
+  background-color: #111116;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.message.assistant pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e0e0e8;
+  font-size: 11.5px;
+}
+
+.message.assistant blockquote {
+  margin: 8px 0;
+  padding: 4px 12px;
+  border-left: 3px solid #7c3aed;
+  background-color: rgba(124, 58, 237, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+}
+
+.message.assistant table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 11.5px;
+}
+
+.message.assistant th,
+.message.assistant td {
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.message.assistant th {
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  color: #a78bfa;
+}
+
+.message.assistant tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+

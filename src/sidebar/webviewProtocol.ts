@@ -17,7 +17,7 @@ export type ChatSession = {
 };
 
 export type WebviewToExtensionMessage =
-  | { type: "submitPrompt"; prompt: string; modelId: string }
+  | { type: "submitPrompt"; prompt: string; modelId: string; isGovernanceCheck?: boolean }
   | { type: "saveApiKey"; provider: "openai" | "zai"; apiKey: string }
   | { type: "deleteApiKey"; provider: "openai" | "zai" }
   | { type: "getSettings" }

@@ -127,7 +127,8 @@ export class AgentOrchestrator {
       onError: (message: string) => void;
     },
     requireFileEditApproval: boolean,
-    requireCommandApproval: boolean
+    requireCommandApproval: boolean,
+    isGovernanceCheck?: boolean
   ): Promise<void> {
     if (this.isRunning) {
       callbacks.onError("Another agent execution loop is already running.");
@@ -154,7 +155,9 @@ export class AgentOrchestrator {
         const context = await this.workspaceContext.getContext();
 
         // 2. Build System Prompt
-        const systemPrompt = AgentPromptBuilder.buildSystemPrompt();
+        const systemPrompt = isGovernanceCheck
+          ? AgentPromptBuilder.buildGovernanceSystemPrompt()
+          : AgentPromptBuilder.buildSystemPrompt();
 
         // 3. Get Adapter for Model
         const adapter = await this.modelRegistry.getAdapter(modelId);
@@ -225,6 +228,11 @@ export class AgentOrchestrator {
           role: "assistant",
           content: finalCleanMessage
         });
+
+        if (isGovernanceCheck) {
+          actionsToRun = [];
+          nextStep = "done";
+        }
 
         // 5. Execute proposed actions
         const actionResults: AgentActionResult[] = [];
