@@ -1,4 +1,4 @@
-import { AgentAction, AgentActionResult } from "../core/agent/AgentTypes";
+import { AgentAction, AgentActionResult, ChatMessage } from "../core/agent/AgentTypes";
 
 export type PublicSettings = {
   selectedModel: string;
@@ -6,6 +6,14 @@ export type PublicSettings = {
   hasZaiKey: boolean;
   requireCommandApproval: boolean;
   requireFileEditApproval: boolean;
+};
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  timestamp: number;
+  conversation: ChatMessage[];
+  modelId: string;
 };
 
 export type WebviewToExtensionMessage =
@@ -17,7 +25,10 @@ export type WebviewToExtensionMessage =
   | { type: "approveAction"; actionId: string }
   | { type: "rejectAction"; actionId: string }
   | { type: "cancelExecution" }
-  | { type: "updateApprovalSettings"; requireCommandApproval: boolean; requireFileEditApproval: boolean };
+  | { type: "updateApprovalSettings"; requireCommandApproval: boolean; requireFileEditApproval: boolean }
+  | { type: "loadSession"; sessionId: string }
+  | { type: "deleteSession"; sessionId: string }
+  | { type: "newChat" };
 
 export type ExtensionToWebviewMessage =
   | { type: "settingsLoaded"; settings: PublicSettings }
@@ -27,4 +38,7 @@ export type ExtensionToWebviewMessage =
   | { type: "actionResult"; result: AgentActionResult }
   | { type: "commandOutput"; text: string }
   | { type: "error"; message: string }
-  | { type: "loopFinished" };
+  | { type: "loopFinished" }
+  | { type: "sessionsLoaded"; sessions: Omit<ChatSession, "conversation">[]; currentSessionId: string }
+  | { type: "loadSessionData"; conversation: ChatMessage[]; modelId: string; sessionId: string };
+

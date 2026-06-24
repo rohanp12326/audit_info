@@ -1,10 +1,7 @@
 import * as vscode from "vscode";
 
 export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
-  // Local path to main script and css run in the webview
   const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "media", "styles.css"));
-  
-  // Use a nonce to only allow specific scripts
   const nonce = getNonce();
 
   return `<!DOCTYPE html>
@@ -14,26 +11,30 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
   <link rel="stylesheet" href="${styleUri}">
-  <title>Vibe Coder</title>
+  <title>Audit AI</title>
 </head>
 <body>
   <header>
     <div class="header-top">
-      <h2>VIBE CODER</h2>
-      <button class="btn-secondary" id="clear-chat-btn" style="padding: 4px 8px; font-size: 10px;">Clear</button>
-    </div>
-    <div class="model-selector-wrapper">
-      <select id="model-select">
-        <option value="openai-gpt-5-4-codex">GPT-5.4 Codex</option>
-        <option value="zai-glm-4-7">GLM-4.7</option>
-      </select>
+      <h2>AUDIT AI</h2>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-secondary" id="new-chat-btn" style="padding: 4px 8px; font-size: 10.5px;">+ New</button>
+        <button class="btn-secondary" id="history-toggle-btn" style="padding: 4px 8px; font-size: 10.5px;">📜 Chats</button>
+      </div>
     </div>
   </header>
+
+  <div class="history-panel" id="history-panel" style="display: none;">
+    <h3>Previous Chats</h3>
+    <div id="sessions-list-container">
+      <!-- Dynamically filled sessions list -->
+    </div>
+  </div>
 
   <div id="chat-container">
     <!-- Messages will be dynamically rendered here -->
     <div class="message assistant" id="welcome-msg">
-      Hello! I am Vibe Coder, your autonomous coding agent. Ask me to fix a bug, build a feature, or explore your workspace files!
+      Hello! I am Audit AI, your autonomous coding agent. Ask me to fix a bug, build a feature, or explore your workspace files!
     </div>
   </div>
 
@@ -70,19 +71,27 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
 
   <div class="input-area">
     <div class="input-row">
-      <textarea id="prompt-input" placeholder="Ask Vibe Coder to build/fix..."></textarea>
+      <textarea id="prompt-input" placeholder="Ask Audit AI to build/fix..."></textarea>
       <button class="send-btn" id="send-btn">
         <span id="send-btn-icon">➔</span>
       </button>
     </div>
     
     <div class="control-bar">
-      <div class="status-badge">
-        <div class="status-indicator" id="status-indicator"></div>
-        <span id="status-text">Idle</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <select id="model-select" class="model-pill-select">
+          <option value="openai-gpt-5-4-codex">GPT-5.4 Codex</option>
+          <option value="zai-glm-4-7">GLM-4.7</option>
+        </select>
+        <div class="status-badge">
+          <div class="status-indicator" id="status-indicator"></div>
+          <span id="status-text">Idle</span>
+        </div>
       </div>
-      <div class="settings-toggle" id="settings-toggle-btn">
-        ⚙ Settings
+      <div style="display: flex; gap: 8px;">
+        <div class="settings-toggle" id="settings-toggle-btn">
+          ⚙ Settings
+        </div>
       </div>
     </div>
   </div>
@@ -96,9 +105,12 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
     const sendBtn = document.getElementById("send-btn");
     const sendBtnIcon = document.getElementById("send-btn-icon");
     const modelSelect = document.getElementById("model-select");
-    const clearChatBtn = document.getElementById("clear-chat-btn");
     const settingsToggleBtn = document.getElementById("settings-toggle-btn");
     const settingsPanel = document.getElementById("settings-panel");
+    const historyToggleBtn = document.getElementById("history-toggle-btn");
+    const historyPanel = document.getElementById("history-panel");
+    const newChatBtn = document.getElementById("new-chat-btn");
+    const sessionsListContainer = document.getElementById("sessions-list-container");
     const statusIndicator = document.getElementById("status-indicator");
     const statusText = document.getElementById("status-text");
 
@@ -136,9 +148,18 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
 
     sendBtn.addEventListener("click", submitPrompt);
     
-    clearChatBtn.addEventListener("click", () => {
-      chatContainer.innerHTML = '<div class="message assistant">Hello! I am Vibe Coder. Let me know what you want to build or run.</div>';
-      vscode.postMessage({ type: "clearChat" });
+    newChatBtn.addEventListener("click", () => {
+      vscode.postMessage({ type: "newChat" });
+      historyPanel.style.display = "none";
+    });
+
+    historyToggleBtn.addEventListener("click", () => {
+      if (historyPanel.style.display === "flex" || historyPanel.style.display === "block") {
+        historyPanel.style.display = "none";
+      } else {
+        historyPanel.style.display = "block";
+        settingsPanel.style.display = "none";
+      }
     });
 
     settingsToggleBtn.addEventListener("click", () => {
@@ -146,6 +167,7 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
         settingsPanel.style.display = "none";
       } else {
         settingsPanel.style.display = "flex";
+        historyPanel.style.display = "none";
       }
     });
 
@@ -299,8 +321,74 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
         case "loopFinished":
           setExecutionState(false);
           break;
+
+        case "sessionsLoaded":
+          renderSessionsList(message.sessions, message.currentSessionId);
+          break;
+
+        case "loadSessionData":
+          loadConversation(message.conversation);
+          modelSelect.value = message.modelId;
+          setExecutionState(false);
+          break;
       }
     });
+
+    function renderSessionsList(sessions, currentSessionId) {
+      sessionsListContainer.innerHTML = "";
+      if (sessions.length === 0) {
+        sessionsListContainer.innerHTML = "<div style='font-size:11px; opacity:0.5; padding:6px;'>No previous chats</div>";
+        return;
+      }
+
+      sessions.forEach(sess => {
+        const item = document.createElement("div");
+        item.className = "session-item" + (sess.id === currentSessionId ? " active" : "");
+        
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "session-title";
+        titleSpan.innerText = sess.title || "Untitled Chat";
+        titleSpan.onclick = () => {
+          vscode.postMessage({ type: "loadSession", sessionId: sess.id });
+        };
+        
+        const deleteBtn = document.createElement("span");
+        deleteBtn.className = "session-delete-btn";
+        deleteBtn.innerText = "✕";
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ type: "deleteSession", sessionId: sess.id });
+        };
+        
+        item.appendChild(titleSpan);
+        item.appendChild(deleteBtn);
+        sessionsListContainer.appendChild(item);
+      });
+    }
+
+    function loadConversation(conversation) {
+      chatContainer.innerHTML = "";
+      if (conversation.length === 0) {
+        chatContainer.innerHTML = '<div class="message assistant" id="welcome-msg">Hello! I am Audit AI, your autonomous coding agent. Ask me to fix a bug, build a feature, or explore your workspace files!</div>';
+      } else {
+        conversation.forEach(msg => {
+          if (msg.role === "user") {
+            appendUserMessage(msg.content);
+          } else if (msg.role === "assistant") {
+            const bubble = document.createElement("div");
+            bubble.className = "message assistant";
+            bubble.innerText = msg.content;
+            chatContainer.appendChild(bubble);
+          } else if (msg.role === "system") {
+            const sys = document.createElement("div");
+            sys.className = "message system";
+            sys.innerText = msg.content;
+            chatContainer.appendChild(sys);
+          }
+        });
+      }
+      scrollToBottom();
+    }
 
     function renderActionPreview(action) {
       const card = document.createElement("div");
@@ -329,7 +417,6 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
 
       card.appendChild(body);
 
-      // Render diff if patch or write
       if (action.type === "patch_file" && action.unifiedDiff) {
         const diffCont = document.createElement("div");
         diffCont.className = "diff-container";
@@ -366,7 +453,6 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
         card.appendChild(cmdEl);
       }
 
-      // Add Approve/Reject buttons
       const controls = document.createElement("div");
       controls.className = "action-controls";
 
@@ -432,7 +518,6 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
       }
       
       currentCmdStreamBlock.innerText += text;
-      // Limit to last 5000 chars to avoid layout freezing
       if (currentCmdStreamBlock.innerText.length > 5000) {
         currentCmdStreamBlock.innerText = currentCmdStreamBlock.innerText.substring(currentCmdStreamBlock.innerText.length - 5000);
       }

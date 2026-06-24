@@ -1,6 +1,6 @@
 {
   "name": "vibe-coder",
-  "displayName": "Vibe Coder",
+  "displayName": "Audit AI",
   "description": "AI coding agent inside VS Code sidebar",
   "version": "0.0.1",
   "publisher": "your-publisher",
@@ -17,7 +17,7 @@
       "activitybar": [
         {
           "id": "vibeCoder",
-          "title": "Vibe Coder",
+          "title": "Audit AI",
           "icon": "media/vibe-icon.svg"
         }
       ]
@@ -26,7 +26,7 @@
       "vibeCoder": [
         {
           "id": "vibeCoder.sidebar",
-          "name": "Vibe Coder",
+          "name": "Audit AI",
           "type": "webview"
         }
       ]
@@ -34,19 +34,19 @@
     "commands": [
       {
         "command": "vibeCoder.open",
-        "title": "Open Vibe Coder"
+        "title": "Open Audit AI"
       },
       {
         "command": "vibeCoder.clearChat",
-        "title": "Vibe Coder: Clear Chat"
+        "title": "Audit AI: Clear Chat"
       },
       {
         "command": "vibeCoder.setApiKeys",
-        "title": "Vibe Coder: Set API Keys"
+        "title": "Audit AI: Set API Keys"
       }
     ],
     "configuration": {
-      "title": "Vibe Coder",
+      "title": "Audit AI",
       "properties": {
         "vibeCoder.defaultModel": {
           "type": "string",
@@ -55,7 +55,7 @@
             "openai-gpt-5-4-codex",
             "zai-glm-4-7"
           ],
-          "description": "Default model used by Vibe Coder."
+          "description": "Default model used by Audit AI."
         },
         "vibeCoder.requireCommandApproval": {
           "type": "boolean",

@@ -11,7 +11,7 @@ import { Logger } from "./core/utils/logger";
 
 export function activate(context: vscode.ExtensionContext) {
   Logger.initialize();
-  Logger.info("Vibe Coder Extension Activating...");
+  Logger.info("Audit AI Extension Activating...");
 
   const secretManager = new SecretManager(context);
   const settingsService = new ExtensionSettingsService();
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const sidebarProvider = new VibeCoderViewProvider(
-    context.extensionUri,
+    context,
     orchestrator,
     secretManager,
     settingsService
@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vibeCoder.clearChat", () => {
       sidebarProvider.clearChat();
-      vscode.window.showInformationMessage("Vibe Coder chat history cleared.");
+      vscode.window.showInformationMessage("Audit AI chat history cleared.");
     })
   );
 
@@ -79,18 +79,18 @@ export function activate(context: vscode.ExtensionContext) {
       if (apiKey !== undefined) {
         if (apiKey.trim()) {
           await secretManager.saveApiKey(provider.value as "openai" | "zai", apiKey.trim());
-          vscode.window.showInformationMessage(`Vibe Coder: API key for ${provider.label} saved securely.`);
+          vscode.window.showInformationMessage(`Audit AI: API key for ${provider.label} saved securely.`);
         } else {
           await secretManager.deleteApiKey(provider.value as "openai" | "zai");
-          vscode.window.showInformationMessage(`Vibe Coder: API key for ${provider.label} removed.`);
+          vscode.window.showInformationMessage(`Audit AI: API key for ${provider.label} removed.`);
         }
       }
     })
   );
 
-  Logger.info("Vibe Coder Extension Activated Successfully.");
+  Logger.info("Audit AI Extension Activated Successfully.");
 }
 
 export function deactivate() {
-  Logger.info("Vibe Coder Extension Deactivated.");
+  Logger.info("Audit AI Extension Deactivated.");
 }
