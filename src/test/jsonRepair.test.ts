@@ -19,4 +19,11 @@ describe("jsonRepair Unit Tests", () => {
     const parsed = JSON.parse(result);
     assert.strictEqual(parsed.assistantMessage, "Done!");
   });
+
+  it("should escape raw control characters in string literals", () => {
+    const rawInput = `{"assistantMessage":"Line 1\nLine 2\tTabbed","actions":[],"nextStep":"done"}`;
+    const result = tryRepairJson(rawInput);
+    const parsed = JSON.parse(result);
+    assert.strictEqual(parsed.assistantMessage, "Line 1\nLine 2\tTabbed");
+  });
 });

@@ -5,7 +5,7 @@ export class Logger {
 
   static initialize() {
     if (!this.channel) {
-      this.channel = vscode.window.createOutputChannel("Vibe Coder");
+      this.channel = vscode.window.createOutputChannel("Audit AI");
     }
   }
 
