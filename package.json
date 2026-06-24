@@ -1,0 +1,95 @@
+{
+  "name": "vibe-coder",
+  "displayName": "Vibe Coder",
+  "description": "AI coding agent inside VS Code sidebar",
+  "version": "0.0.1",
+  "publisher": "your-publisher",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibeCoder",
+          "title": "Vibe Coder",
+          "icon": "media/vibe-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vibeCoder": [
+        {
+          "id": "vibeCoder.sidebar",
+          "name": "Vibe Coder",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vibeCoder.open",
+        "title": "Open Vibe Coder"
+      },
+      {
+        "command": "vibeCoder.clearChat",
+        "title": "Vibe Coder: Clear Chat"
+      },
+      {
+        "command": "vibeCoder.setApiKeys",
+        "title": "Vibe Coder: Set API Keys"
+      }
+    ],
+    "configuration": {
+      "title": "Vibe Coder",
+      "properties": {
+        "vibeCoder.defaultModel": {
+          "type": "string",
+          "default": "openai-gpt-5-4-codex",
+          "enum": [
+            "openai-gpt-5-4-codex",
+            "zai-glm-4-7"
+          ],
+          "description": "Default model used by Vibe Coder."
+        },
+        "vibeCoder.requireCommandApproval": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask before running terminal commands."
+        },
+        "vibeCoder.requireFileEditApproval": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask before applying file modifications."
+        },
+        "vibeCoder.maxContextFiles": {
+          "type": "number",
+          "default": 20,
+          "description": "Maximum files to include in one prompt context."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "check-types": "tsc --noEmit",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/node": "^20.10.0",
+    "@types/mocha": "^10.0.6",
+    "typescript": "^5.3.3",
+    "esbuild": "^0.20.2",
+    "mocha": "^10.3.0",
+    "@vscode/test-electron": "^2.3.9"
+  }
+}
